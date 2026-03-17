@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <title>kuch shabd · dosti ke naam</title>
+  <!-- Firebase modular SDK for Realtime Database -->
+  <script type="module">
+    // Import Firebase Realtime Database
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getDatabase, ref, push, query, orderByChild, onValue, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+    // 🔴 REPLACE THIS WITH YOUR FIREBASE CONFIG (including databaseURL) 🔴
+    const firebaseConfig = {
+      apiKey: "AIzaSyBxTlE1PryL6LrLo5qE3e3X2jFkY7XyZqM",
+      authDomain: "kuch-shabd-dosti.firebaseapp.com",
+      databaseURL: "https://kuch-shabd-dosti-default-rtdb.firebaseio.com", // 👈 Required for Realtime DB
+      projectId: "kuch-shabd-dosti",
+      storageBucket: "kuch-shabd-dosti.appspot.com",
+      messagingSenderId: "123456789012",
+      appId: "1:123456789012:web:abc123def456"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    window.db = db;
+    window.ref = ref;
+    window.push = push;
+    window.query = query;
+    window.orderByChild = orderByChild;
+    window.onValue = onValue;
+    window.serverTimestamp = serverTimestamp;
+  </script>
+  <!-- Font Awesome 6 (free) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <!-- Google Font for extra flair -->
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: radial-gradient(circle at 30% 10%, #140c07, #030201);
+      font-family: 'Space Grotesk', 'Inter', sans-serif;
+      min-height: 100vh;
+      padding: 2rem 1.2rem 3rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: #f0e7dc;
+    }
+
+    .wrapper {
+      max-width: 1440px;
+      width: 100%;
+    }
+
+    /* ----- cosmic header (still dreamy) ----- */
+    .header {
+      text-align: center;
+      margin: 1rem 0 3rem;
+      position: relative;
+    }
+
+    .header h1 {
+      font-size: clamp(3rem, 13vw, 5.5rem);
+      font-weight: 700;
+      background: linear-gradient(145deg, #ffcfa3, #f09d67, #d4a984, #aacbd6);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-shadow: 0 0 30px #ff8c5a, 0 0 80px #b34f1a;
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+    }
+
+    .header h1 span {
+      font-size: 0.48em;
+      display: block;
+      font-weight: 300;
+      letter-spacing: 0.45em;
+      color: #ecd8bf;
+      text-shadow: 0 0 12px cyan;
+      margin-top: -0.2rem;
+    }
+
+    /* ===== SEARCH BAR – OUT OF THIS WORLD ===== */
+    .search-cosmic {
+      display: flex;
+      justify-content: center;
+      margin: 2rem 0 3.5rem;
+    }
+
+    .nebula-search {
+      position: relative;
+      width: 100%;
+      max-width: 650px;
+    }
+
+    .search-input {
+      width: 100%;
+      background: rgba(10, 6, 3, 0.7);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 2px solid rgba(255, 165, 100, 0.3);
+      border-radius: 120px;
+      padding: 1.4rem 2rem 1.4rem 4rem;
+      font-size: 1.6rem;
+      font-weight: 400;
+      color: #ffefe2;
+      box-shadow: 0 0 40px rgba(255, 140, 0, 0.3), 0 15px 35px rgba(0,0,0,0.8), inset 0 0 30px #ff9f4d30;
+      transition: all 0.25s ease;
+      letter-spacing: 0.5px;
+      outline: none;
+    }
+
+    .search-input::placeholder {
+      color: #bb9f88;
+      font-style: italic;
+      font-size: 1.3rem;
+      opacity: 0.7;
+    }
+
+    .search-input:focus {
+      border-color: #feb06a;
+      box-shadow: 0 0 60px #ff9f4d, 0 20px 40px black, inset 0 0 30px #ffc293;
+      background: rgba(20, 12, 7, 0.8);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 1.5rem;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 2rem;
+      color: #fea95e;
+      filter: drop-shadow(0 0 15px #ff9d40);
+      pointer-events: none;
+      transition: 0.2s;
+    }
+
+    .search-clear {
+      position: absolute;
+      right: 1.2rem;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(70, 40, 25, 0.8);
+      backdrop-filter: blur(10px);
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #f3cdb1;
+      font-size: 2rem;
+      cursor: pointer;
+      border: 1px solid #cf8f5e;
+      box-shadow: 0 0 20px #f2722e;
+      transition: 0.15s;
+    }
+
+    .search-clear:hover {
+      background: #8f572e;
+      color: white;
+      transform: translateY(-50%) scale(1.1);
+      box-shadow: 0 0 35px #ffa44a;
+    }
+
+    /* ----- friends grid (cards already awesome, just minor glow boost) ----- */
+    .friends-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
+      gap: 2.2rem 1.8rem;
+      margin: 3rem 0 3rem;
+    }
+
+    .person-card {
+      background: rgba(18, 12, 8, 0.65);
+      backdrop-filter: blur(18px) saturate(200%);
+      -webkit-backdrop-filter: blur(18px) saturate(200%);
+      border-radius: 3.5rem 1.8rem 3.5rem 1.8rem;
+      border: 1px solid rgba(255, 172, 100, 0.35);
+      box-shadow: 0 30px 50px -20px #000, 0 0 0 1px #be7f51 inset, 0 0 60px #ff7f2a20;
+      transition: 0.3s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .person-card:hover {
+      transform: scale(1.02) translateY(-12px);
+      border-color: #ffbd82;
+      box-shadow: 0 40px 60px -15px black, 0 0 70px #ff974f;
+    }
+
+    .name-badge {
+      padding: 1.6rem 1.5rem 1rem;
+      border-bottom: 3px solid #f5a465;
+      background: linear-gradient(125deg, #281b12, #180f09);
+    }
+
+    .name-badge h2 {
+      font-size: 2.3rem;
+      font-weight: 600;
+      color: #ffe8d4;
+      text-shadow: 0 4px 12px #6b3c1e;
+      word-break: break-word;
+    }
+
+    .card-split {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      padding: 1.3rem 1.2rem 1.6rem;
+      gap: 1.2rem;
+      background: rgba(0,0,0,0.2);
+    }
+
+    .left-write {
+      flex: 1 1 200px;
+    }
+
+    .right-anon {
+      flex: 2 1 260px;
+    }
+
+    .section-label {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      font-weight: 600;
+      color: #f5c09d;
+      margin-bottom: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+    }
+
+    .section-label i {
+      font-size: 1.2rem;
+      color: #ffb072;
+    }
+
+    /* write area */
+    .write-box {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .write-box textarea {
+      background: #17100ab0;
+      border: 2px solid #c28960;
+      border-radius: 32px;
+      padding: 1.1rem 1.3rem;
+      font-size: 1rem;
+      color: #fde9d9;
+      resize: vertical;
+      min-height: 125px;
+      backdrop-filter: blur(4px);
+      transition: 0.2s;
+      box-shadow: inset 0 0 25px #000000cc;
+      font-family: 'Space Grotesk', sans-serif;
+    }
+
+    .write-box textarea:focus {
+      border-color: #ffb47b;
+      outline: none;
+      background: #1f140eb0;
+      box-shadow: 0 0 25px #ffa655, inset 0 0 15px #000;
+    }
+
+    .write-box button {
+      background: linear-gradient(125deg, #ce763b, #aa633b);
+      border: none;
+      color: #110a05;
+      font-weight: 700;
+      font-size: 1.1rem;
+      padding: 1rem 1rem;
+      border-radius: 50px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.8rem;
+      box-shadow: 0 8px 0 #593d28, 0 15px 30px black;
+      transition: 0.06s linear;
+      border: 1px solid #ffbc81;
+      letter-spacing: 1px;
+    }
+
+    .write-box button:active {
+      transform: translateY(6px);
+      box-shadow: 0 2px 0 #593d28, 0 15px 30px black;
+    }
+
+    /* messages wall */
+    .messages-wall {
+      background: rgba(5, 3, 2, 0.7);
+      backdrop-filter: blur(14px);
+      border-radius: 32px;
+      padding: 1.2rem 1rem 0.6rem;
+      max-height: 270px;
+      overflow-y: auto;
+      border: 1px solid #b77d57;
+      box-shadow: inset 0 0 35px #000, 0 12px 24px #000000b0;
+    }
+
+    .message-item {
+      background: #281d15e0;
+      border-radius: 30px 30px 30px 12px;
+      padding: 1rem 1.4rem;
+      margin-bottom: 0.9rem;
+      color: #f8e2cf;
+      font-size: 1rem;
+      border-left: 6px solid #e29056;
+      box-shadow: 0 8px 18px #000000cc;
+      word-break: break-word;
+      border: 1px solid #d9925d70;
+    }
+
+    .message-item::after {
+      content: "⚡ anonymous · only love";
+      font-size: 0.7rem;
+      color: #cfb09a;
+      display: block;
+      text-align: right;
+      margin-top: 0.5rem;
+      border-top: 1px dashed #b18262;
+      padding-top: 0.4rem;
+      letter-spacing: 0.7px;
+    }
+
+    .empty-note {
+      color: #c9ab92;
+      font-style: italic;
+      padding: 1.7rem 0.3rem;
+      text-align: center;
+      background: #1e130b40;
+      border-radius: 40px;
+      font-size: 1.1rem;
+    }
+
+    .footer-note {
+      background: #1d120bb0;
+      backdrop-filter: blur(16px);
+      padding: 1.4rem 2.5rem;
+      border-radius: 100px;
+      border: 1px solid #e49f69;
+      width: fit-content;
+      margin: 3.5rem auto 0;
+      color: #ffe8cf;
+      font-size: 1.4rem;
+      font-weight: 300;
+      box-shadow: 0 0 50px #ffa65b;
+      text-align: center;
+    }
+
+    /* hide class */
+    .hidden {
+      display: none;
+    }
+
+    /* scroll beauty */
+    .messages-wall::-webkit-scrollbar {
+      width: 5px;
+    }
+    .messages-wall::-webkit-scrollbar-track {
+      background: #2f1e13;
+    }
+    .messages-wall::-webkit-scrollbar-thumb {
+      background: #b6794c;
+      border-radius: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <div class="header">
+      <h1>kuch shabd <span>dosti ke naam</span></h1>
+    </div>
+
+    <!-- ===== NEW SUPER SEARCH ===== no "tu kaun hai" section, just pure search -->
+    <div class="search-cosmic">
+      <div class="nebula-search">
+        <i class="fa-regular fa-magnifying-glass search-icon"></i>
+        <input type="text" id="searchInput" class="search-input" placeholder="search for shaurya, ayushi, anand..." autocomplete="off">
+        <span class="search-clear" id="clearSearch"><i class="fa-regular fa-xmark"></i></span>
+      </div>
+    </div>
+
+    <!-- dynamic grid injected here -->
+    <div id="friendsGrid" class="friends-grid"></div>
+
+    <div class="footer-note">
+      <i class="fa-regular fa-lock"></i>  no names revealed · only memories  <i class="fa-regular fa-star"></i>
+    </div>
+  </div>
+
+  <script type="module">
+    // ---------- NAMES (sorted alphabetical, unique, 27) ----------
+    const rawNames = [
+      "Anand", "Anmol", "Ashish", "Astha", "Ayushi", "Ayushkant", "Ayush P.",
+      "Diksha", "Ekansh", "Hanshika", "Hema", "Ishu", "Jyotiraditya", "Kavita",
+      "Kirti", "Lakshya", "Manish", "Md Anis", "Priyanshi", "Samarth", "Samridhi",
+      "Shaurya", "Shivraj", "Shubham", "Yuvraj", "Yuvraj S."
+    ];
+    const uniqueNames = [...new Set(rawNames)].sort((a,b) => a.localeCompare(b));
+
+    // ---------- Realtime Database ----------
+    import { getDatabase, ref, push, query, orderByChild, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    const db = window.db;
+    const messagesRef = ref(db, 'messages');
+
+    // ---------- search & clear ----------
+    const searchInput = document.getElementById('searchInput');
+    const clearBtn = document.getElementById('clearSearch');
+
+    // ---------- function to build grid with filter ----------
+    function buildGrid(filterText = '') {
+      const grid = document.getElementById('friendsGrid');
+      grid.innerHTML = '';
+      const lowerFilter = filterText.toLowerCase().trim();
+      const filtered = uniqueNames.filter(name => name.toLowerCase().includes(lowerFilter));
+
+      if (filtered.length === 0) {
+        grid.innerHTML = '<div style="grid-column:1/-1; text-align:center; color:#dbb39b; padding:5rem; font-size:2rem; font-weight:300;">✨ no such friend? but they exist in heart ✨</div>';
+        return;
+      }
+
+      filtered.forEach(friend => {
+        const safeId = friend.replace(/\s|\./g, '');
+        const card = document.createElement('div');
+        card.className = 'person-card';
+        card.id = `card-${safeId}`;
+
+        // badge
+        const badge = document.createElement('div');
+        badge.className = 'name-badge';
+        badge.innerHTML = `<h2>${friend}</h2>`;
+        card.appendChild(badge);
+
+        const splitDiv = document.createElement('div');
+        splitDiv.className = 'card-split';
+
+        // left column (write)
+        const leftCol = document.createElement('div');
+        leftCol.className = 'left-write';
+        leftCol.innerHTML = `
+          <div class="section-label"><i class="fa-regular fa-pencil"></i> whisper</div>
+          <div class="write-box">
+            <textarea id="input-${safeId}" placeholder="something about ${friend}... (no name)"></textarea>
+            <button class="post-btn" data-friend="${friend}" id="btn-${safeId}"><i class="fa-regular fa-paper-plane"></i> send · anonymous</button>
+          </div>
+        `;
+
+        // right column (wall)
+        const rightCol = document.createElement('div');
+        rightCol.className = 'right-anon';
+        rightCol.innerHTML = `
+          <div class="section-label"><i class="fa-regular fa-message"></i> anonymous wall</div>
+          <div id="wall-${safeId}" class="messages-wall"><div class="empty-note">🌀 loading whispers...</div></div>
+        `;
+
+        splitDiv.appendChild(leftCol);
+        splitDiv.appendChild(rightCol);
+        card.appendChild(splitDiv);
+        grid.appendChild(card);
+
+        // Realtime Database listener for this friend
+        const wallDiv = document.getElementById(`wall-${safeId}`);
+        const friendMessagesQuery = query(ref(db, 'messages'), orderByChild('friendName'));
+
+        onValue(friendMessagesQuery, (snapshot) => {
+          if (!wallDiv) return;
+          const messages = [];
+          snapshot.forEach((childSnapshot) => {
+            const data = childSnapshot.val();
+            if (data.friendName === friend) {
+              messages.push({ text: data.text, timestamp: data.timestamp || 0 });
+            }
+          });
+          // sort descending (newest first)
+          messages.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+
+          if (messages.length === 0) {
+            wallDiv.innerHTML = `<div class="empty-note">💬 no whispers yet. be the first.</div>`;
+            return;
+          }
+
+          let html = '';
+          messages.slice(0, 15).forEach(msg => {
+            html += `<div class="message-item">${msg.text}</div>`;
+          });
+          wallDiv.innerHTML = html;
+        });
+
+        // post button logic
+        const btn = document.getElementById(`btn-${safeId}`);
+        const textarea = document.getElementById(`input-${safeId}`);
+
+        btn.addEventListener('click', async () => {
+          const msg = textarea.value.trim();
+          if (!msg) { alert('kuch likho yaar ❤️'); return; }
+          const trimmed = msg.length > 500 ? msg.substring(0,500)+'…' : msg;
+          try {
+            await push(ref(db, 'messages'), {
+              friendName: friend,
+              text: trimmed,
+              timestamp: Date.now()
+            });
+            textarea.value = '';
+          } catch (e) {
+            alert('✨ cosmic delay, but your message will appear!');
+            console.error(e);
+          }
+        });
+
+        textarea.addEventListener('keydown', (e) => {
+          if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+            e.preventDefault();
+            btn.click();
+          }
+        });
+      });
+    }
+
+    // initial render (all names)
+    buildGrid('');
+
+    // Search event
+    searchInput.addEventListener('input', (e) => {
+      buildGrid(e.target.value);
+    });
+
+    // Clear search
+    clearBtn.addEventListener('click', () => {
+      searchInput.value = '';
+      buildGrid('');
+    });
+  </script>
+</body>
+</html>
