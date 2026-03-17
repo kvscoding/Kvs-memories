@@ -11,13 +11,14 @@
     import { getFirestore, collection, addDoc, query, where, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
-      apiKey: "AIzaSyBxTlE1PryL6LrLo5qE3e3X2jFkY7XyZqM",
-      authDomain: "kuch-shabd-dosti.firebaseapp.com",
-      projectId: "kuch-shabd-dosti",
-      storageBucket: "kuch-shabd-dosti.appspot.com",
-      messagingSenderId: "123456789012",
-      appId: "1:123456789012:web:abc123def456"
-    };
+  apiKey: "AIzaSyDRw4QHPAWXty31nryeRFmeMztb_9j8-TQ",
+  authDomain: "adminsblog-9cd55.firebaseapp.com",
+  databaseURL: "https://adminsblog-9cd55-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "adminsblog-9cd55",
+  storageBucket: "adminsblog-9cd55.firebasestorage.app",
+  messagingSenderId: "622544158173",
+  appId: "1:622544158173:web:bef504dd215193fd4c4a34"
+};
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
